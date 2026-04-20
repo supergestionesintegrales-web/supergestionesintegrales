@@ -152,8 +152,10 @@
   <button id="switch-btn" onclick="backToSelector()">⇄ vista</button>
 
   <script>
-    var APP_URL = "https://script.google.com/macros/s/AKfycbzAyoeOAxP6YEVi4lfuG1j-pXzPDOahiUrjAWdEnV7jI_5XTodeB8G6F9_gTB_GG1y9/exec";
-    var MOBILE_W = 390; // ancho virtual móvil en px
+    var APP_URL = "https://script.google.com/macros/s/AKfycbxYP24cH0Qt0yOEtQdPegDJi1TTgqpAGYedZMbcEF9T2bVWVh1CvU4D5YM3l8Ar8JPY/exec";
+    // Viewport virtual móvil en proporción 9:16
+    var MOBILE_W = 390;
+    var MOBILE_H = Math.round(MOBILE_W * 16 / 9); // 693px
 
     function launch(mode) {
       var selector = document.getElementById('selector');
@@ -190,18 +192,22 @@
         frame.style.left      = '0';
 
       } else {
-        // MÓVIL: el iframe se renderiza con ancho MOBILE_W
-        // y se escala para llenar la pantalla completa
-        var scale = vw / MOBILE_W;
-        var scaledH = vh / scale;
+        // MÓVIL: viewport fijo 9:16 (390x693) escalado para llenar pantalla
+        // Se escala por el eje que mejor encaje sin deformar
+        var scaleX = vw / MOBILE_W;
+        var scaleY = vh / MOBILE_H;
+        var scale  = Math.min(scaleX, scaleY); // fit sin distorsión
 
-        frame.style.width     = MOBILE_W + 'px';
-        frame.style.height    = scaledH + 'px';
-        frame.style.transform = 'scale(' + scale + ')';
+        var offsetX = (vw - MOBILE_W * scale) / 2;
+        var offsetY = (vh - MOBILE_H * scale) / 2;
+
+        frame.style.width          = MOBILE_W + 'px';
+        frame.style.height         = MOBILE_H + 'px';
+        frame.style.transform      = 'translate(' + offsetX + 'px, ' + offsetY + 'px) scale(' + scale + ')';
         frame.style.transformOrigin = 'top left';
-        frame.style.position  = 'absolute';
-        frame.style.top       = '0';
-        frame.style.left      = '0';
+        frame.style.position       = 'absolute';
+        frame.style.top            = '0';
+        frame.style.left           = '0';
       }
     }
 
