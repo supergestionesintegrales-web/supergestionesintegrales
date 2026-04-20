@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- Permite que Google Apps Script funcione correctamente en todos los navegadores -->
+  <meta http-equiv="Content-Security-Policy" content="frame-src *; default-src * 'unsafe-inline' 'unsafe-eval';">
+  <title>MULTISIG</title>
+
+  <link rel="icon" type="image/png" sizes="32x32" 
+        href="https://static.vecteezy.com/system/resources/previews/053/387/130/non_2x/multitasking-concept-line-icon-simple-element-illustration-multitasking-concept-outline-symbol-design-vector.jpg">
+  <link rel="apple-touch-icon" 
+        href="https://static.vecteezy.com/system/resources/previews/053/387/130/non_2x/multitasking-concept-line-icon-simple-element-illustration-multitasking-concept-outline-symbol-design-vector.jpg">
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: auto;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    /* ── Pantalla de selección ── */
+    #selector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: #fff;
+      gap: 32px;
+    }
+
+    #selector .logo {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: #e0e0e0;
+    }
+
+    #selector .subtitle {
+      font-size: 0.95rem;
+      color: #a0aec0;
+      margin-top: -20px;
+    }
+
+    #selector .cards {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .mode-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 36px 40px;
+      cursor: pointer;
+      text-align: center;
+      transition: transform 0.2s, background 0.2s, border-color 0.2s;
+      min-width: 160px;
+    }
+
+    .mode-card:hover {
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.35);
+      transform: translateY(-4px);
+    }
+
+    .mode-card .icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .mode-card .label {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .mode-card .desc {
+      font-size: 0.78rem;
+      color: #90a0b7;
+      margin-top: 6px;
+    }
+
+    /* ── Iframe ── */
+    #app {
+      display: none;
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    #app iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      overflow: auto;
+    }
+
+    /* Modo móvil: pantalla completa igual que PC */
+    #app.mobile {
+      display: block;
+      overflow: auto;
+    }
+
+    #app.mobile iframe {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      box-shadow: none;
+      overflow: auto;
+    }
+
+    /* Botón flotante para cambiar de modo */
+    #switch-btn {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 9999;
+      background: rgba(0,0,0,0.25);
+      color: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 4px;
+      backdrop-filter: blur(4px);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    #switch-btn:hover {
+      background: rgba(0,0,0,0.45);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Pantalla de selección de modo -->
+  <div id="selector">
+    <div class="logo">MULTISIG</div>
+    <div class="subtitle">Selecciona cómo deseas acceder</div>
+
+    <div class="cards">
+      <div class="mode-card" onclick="launch('pc')">
+        <div class="icon">🖥️</div>
+        <div class="label">Modo PC</div>
+        <div class="desc">Vista completa de escritorio</div>
+      </div>
+
+      <div class="mode-card" onclick="launch('mobile')">
+        <div class="icon">📱</div>
+        <div class="label">Modo Móvil</div>
+        <div class="desc">Vista optimizada para teléfono</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor del sistema -->
+  <div id="app">
+    <iframe 
+      id="main-frame"
+      src=""
+      allow="fullscreen; popups; popups-to-escape-sandbox; forms; scripts; same-origin; storage-access-by-user-activation; cross-origin-isolated"
+      allowfullscreen
+      allowpaymentrequest>
+    </iframe>
+  </div>
+
+  <!-- Botón flotante para cambiar de modo -->
+  <button id="switch-btn" onclick="backToSelector()">
+    <span>⇄</span> Cambiar vista
+  </button>
+
+  <script>
+    const APP_URL = "https://script.google.com/macros/s/AKfycbw4Uw7CNouO9U5m1LFqo8vGTdJC6eYUZousinVBZD5pYCeSIQatDUfQLEoH27wLlMAM/exec";
+
+    function launch(mode) {
+      var selector = document.getElementById('selector');
+      var app      = document.getElementById('app');
+      var frame    = document.getElementById('main-frame');
+      var btn      = document.getElementById('switch-btn');
+
+      // Cargar URL solo si no está cargada aún
+      if (!frame.src || frame.src === 'about:blank' || frame.src === window.location.href) {
+        frame.src = APP_URL;
+      }
+
+      selector.style.display = 'none';
+
+      app.className = mode === 'mobile' ? 'mobile' : '';
+      app.style.display = 'block';
+
+      btn.style.display = '-webkit-flex';
+      btn.style.display = 'flex';
+    }
+
+    function backToSelector() {
+      document.getElementById('selector').style.display = '-webkit-flex';
+      document.getElementById('selector').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('switch-btn').style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>
