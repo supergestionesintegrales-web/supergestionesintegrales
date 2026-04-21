@@ -23,125 +23,51 @@
       background: #000;
     }
 
-    /* ── Selector ── */
-    #selector {
-      display: -webkit-flex;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 100%; height: 100%;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      color: #fff;
-      gap: 32px;
-      position: absolute;
-      top: 0; left: 0;
-      z-index: 10;
-    }
-
-    #selector .logo {
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: 4px;
-      color: #e0e0e0;
-    }
-
-    #selector .subtitle {
-      font-size: 0.95rem;
-      color: #a0aec0;
-      margin-top: -20px;
-    }
-
-    #selector .cards {
-      display: -webkit-flex;
-      display: flex;
-      gap: 24px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .mode-card {
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 16px;
-      padding: 36px 40px;
-      cursor: pointer;
-      text-align: center;
-      transition: transform 0.2s, background 0.2s;
-      min-width: 160px;
-    }
-
-    .mode-card:hover {
-      background: rgba(255,255,255,0.14);
-      border-color: rgba(255,255,255,0.35);
-      transform: translateY(-4px);
-    }
-
-    .mode-card .icon { font-size: 3rem; margin-bottom: 12px; }
-    .mode-card .label { font-size: 1.1rem; font-weight: 600; color: #e2e8f0; }
-    .mode-card .desc  { font-size: 0.78rem; color: #90a0b7; margin-top: 6px; }
-
     /* ── Contenedor app ── */
     #app {
-      display: none;
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
       overflow: hidden;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     }
 
     /* ── Iframe base ── */
     #main-frame {
       border: none;
       display: block;
+      width: 100%;
+      height: 100%;
+      background: #fff;
     }
 
-    /* ── Botón cambiar vista ── */
-    #switch-btn {
+    /* ── Barra de carga ── */
+    #loader {
       position: fixed;
-      top: 8px; left: 8px;
+      top: 0; left: 0;
+      width: 100%; height: 4px;
+      background: transparent;
       z-index: 9999;
-      background: rgba(0,0,0,0.18);
-      color: rgba(255,255,255,0.5);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 6px;
-      padding: 3px 7px;
-      font-size: 0.65rem;
-      cursor: pointer;
-      display: none;
-      -webkit-align-items: center;
-      align-items: center;
-      gap: 3px;
-      -webkit-backdrop-filter: blur(4px);
-      backdrop-filter: blur(4px);
-      transition: background 0.2s, color 0.2s;
-      line-height: 1.4;
+      overflow: hidden;
     }
-
-    #switch-btn:hover {
-      background: rgba(0,0,0,0.35);
-      color: rgba(255,255,255,0.85);
+    #loader::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      height: 100%;
+      width: 30%;
+      background: linear-gradient(90deg, transparent, #4facfe, transparent);
+      animation: load 1.2s infinite ease-in-out;
+    }
+    @keyframes load {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(400%); }
     }
   </style>
 </head>
 <body>
 
-  <div id="selector">
-    <div class="logo">MULTISIG</div>
-    <div class="subtitle">Selecciona cómo deseas acceder</div>
-    <div class="cards">
-      <div class="mode-card" onclick="launch('pc')">
-        <div class="icon">🖥️</div>
-        <div class="label">Modo PC</div>
-        <div class="desc">Vista completa de escritorio</div>
-      </div>
-      <div class="mode-card" onclick="launch('mobile')">
-        <div class="icon">📱</div>
-        <div class="label">Modo Móvil</div>
-        <div class="desc">Vista optimizada para teléfono</div>
-      </div>
-    </div>
-  </div>
+  <div id="loader"></div>
 
   <div id="app">
     <iframe id="main-frame" src="" allowfullscreen
@@ -149,83 +75,34 @@
     </iframe>
   </div>
 
-  <button id="switch-btn" onclick="backToSelector()">⇄ vista</button>
-
   <script>
-    var APP_URL = "https://script.google.com/macros/s/AKfycbzS2K6oLfkQ2Y2FUKdAKnj6ziawVoA2eeuhemYRGNWLdOewlm0J4O5gsKCsHxfxV6v9aw/exec";
-    // Viewport virtual móvil en proporción 9:16
-    var MOBILE_W = 390;
-    var MOBILE_H = Math.round(MOBILE_W * 16 / 9); // 693px
+    var APP_URL = "https://script.google.com/macros/s/AKfycbw3-e1-vFNPCmrlJ9xZHMq76SzDJyIMlQW_YcQlLsktbO30gn_4kmXx-AXrl7X9fE2QRg/exec";
+    var frame = document.getElementById('main-frame');
+    var loader = document.getElementById('loader');
 
-    function launch(mode) {
-      var selector = document.getElementById('selector');
-      var app      = document.getElementById('app');
-      var frame    = document.getElementById('main-frame');
-      var btn      = document.getElementById('switch-btn');
+    // Cargar aplicación directamente
+    frame.src = APP_URL;
 
-      selector.style.display = 'none';
-      app.style.display = 'block';
-      btn.style.display = '-webkit-inline-flex';
-      btn.style.display = 'inline-flex';
+    // Ocultar loader cuando cargue el iframe
+    frame.onload = function() {
+      loader.style.display = 'none';
+    };
 
-      applyMode(mode, frame);
+    // Manejo de errores de carga
+    frame.onerror = function() {
+      loader.style.display = 'none';
+      console.error('Error al cargar la aplicación');
+    };
 
-      if (!frame.src || frame.src === 'about:blank' || frame.src === window.location.href) {
-        frame.src = APP_URL;
-      }
-
-      window._currentMode = mode;
+    // Ajuste responsive automático (opcional para mejor experiencia móvil)
+    function adjustFrame() {
+      // El iframe ya ocupa 100% del contenedor, pero podemos asegurar que se adapte
+      frame.style.width = '100%';
+      frame.style.height = '100%';
     }
 
-    function applyMode(mode, frame) {
-      var vw = window.innerWidth;
-      var vh = window.innerHeight;
-
-      if (mode === 'pc') {
-        // PC: iframe ocupa todo, sin transformación
-        frame.style.width     = vw + 'px';
-        frame.style.height    = vh + 'px';
-        frame.style.transform = 'none';
-        frame.style.transformOrigin = 'top left';
-        frame.style.position  = 'absolute';
-        frame.style.top       = '0';
-        frame.style.left      = '0';
-
-      } else {
-        // MÓVIL: viewport fijo 9:16 (390x693) escalado para llenar pantalla
-        // Se escala por el eje que mejor encaje sin deformar
-        var scaleX = vw / MOBILE_W;
-        var scaleY = vh / MOBILE_H;
-        var scale  = Math.min(scaleX, scaleY); // fit sin distorsión
-
-        var offsetX = (vw - MOBILE_W * scale) / 2;
-        var offsetY = (vh - MOBILE_H * scale) / 2;
-
-        frame.style.width          = MOBILE_W + 'px';
-        frame.style.height         = MOBILE_H + 'px';
-        frame.style.transform      = 'translate(' + offsetX + 'px, ' + offsetY + 'px) scale(' + scale + ')';
-        frame.style.transformOrigin = 'top left';
-        frame.style.position       = 'absolute';
-        frame.style.top            = '0';
-        frame.style.left           = '0';
-      }
-    }
-
-    function backToSelector() {
-      var frame = document.getElementById('main-frame');
-      frame.style.transform = 'none';
-      document.getElementById('selector').style.display = '-webkit-flex';
-      document.getElementById('selector').style.display = 'flex';
-      document.getElementById('app').style.display = 'none';
-      document.getElementById('switch-btn').style.display = 'none';
-    }
-
-    // Re-aplicar al redimensionar ventana
-    window.addEventListener('resize', function() {
-      if (window._currentMode) {
-        applyMode(window._currentMode, document.getElementById('main-frame'));
-      }
-    });
+    window.addEventListener('resize', adjustFrame);
+    window.addEventListener('load', adjustFrame);
   </script>
 
 </body>
