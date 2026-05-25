@@ -36,125 +36,23 @@
     var deviceMode = getDeviceMode();
     var fullUrl = BASE_URL + "?mode=" + deviceMode;
     
-    window.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('viewer').src = fullUrl;
-    });
-
-    window.addEventListener('orientationchange', function() {
-      setTimeout(function() {
-        var viewer = document.getElementById('viewer');
-        viewer.style.height = window.innerHeight + 'px';
-      }, 100);
-    });
+    // Redirige directamente sin esperar
+    window.location.href = fullUrl;
   </script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
-    html {
-      width: 100%;
-      height: 100%;
-    }
-
-    body {
+    html, body {
       margin: 0; 
       padding: 0;
       width: 100%;
       height: 100vh;
       overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #000;
-    }
-
-    /* Estilos para móvil */
-    body[data-device="mobile"] {
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-      -webkit-text-size-adjust: 100%;
-      -ms-text-size-adjust: 100%;
-    }
-
-    body[data-device="mobile"] #viewer {
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Estilos para PC */
-    body[data-device="pc"] #viewer {
-      width: 100%;
-      height: 100%;
-    }
-
-    #viewer {
-      border: none;
-      display: block;
-      background: #fff;
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* Media queries para mejor adaptación */
-    @media (max-width: 768px) {
-      body {
-        height: 100vh;
-      }
-      
-      #viewer {
-        height: 100vh;
-      }
-    }
-
-    @media (min-width: 769px) {
-      body {
-        height: 100vh;
-      }
-      
-      #viewer {
-        height: 100vh;
-      }
-    }
-
-    /* Orientación landscape */
-    @media (orientation: landscape) {
-      body {
-        height: 100vh;
-      }
-      
-      #viewer {
-        height: 100vh;
-      }
-    }
-
-    /* Orientación portrait */
-    @media (orientation: portrait) {
-      body {
-        height: 100vh;
-      }
-      
-      #viewer {
-        height: 100vh;
-      }
-    }
-
-    /* Prevenir scrollbars innecesarios */
-    html, body {
-      -webkit-user-select: none;
-      user-select: none;
-    }
-
-    /* Asegurar que el viewer se adapte correctamente */
-    body > * {
-      width: 100%;
-      height: 100%;
     }
   </style>
 </head>
 <body>
-  <iframe id="viewer"></iframe>
 </body>
 </html>
