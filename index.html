@@ -26,18 +26,17 @@
       return mobileRegex.test(userAgent) || isMobileScreen;
     }
 
-    function getDeviceMode() {
+    function loadViewer() {
       var mode = isMobileDevice() ? 'mobile' : 'pc';
-      document.documentElement.setAttribute('data-device', mode);
-      document.body.setAttribute('data-device', mode);
-      return mode;
+      var fullUrl = BASE_URL + "?mode=" + mode;
+      document.getElementById('viewer').src = fullUrl;
     }
 
-    var deviceMode = getDeviceMode();
-    var fullUrl = BASE_URL + "?mode=" + deviceMode;
-    
-    // Redirige directamente sin esperar
-    window.location.href = fullUrl;
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadViewer);
+    } else {
+      loadViewer();
+    }
   </script>
 
   <style>
@@ -49,10 +48,19 @@
       width: 100%;
       height: 100vh;
       overflow: hidden;
-      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #fff;
+    }
+
+    #viewer {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
     }
   </style>
 </head>
 <body>
+  <iframe id="viewer"></iframe>
 </body>
 </html>
